@@ -186,11 +186,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def recipe_delete_method(self, request, pk):
+    def recipe_delete_method(self, request, YoursModel, pk):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
+        recipe = get_object_or_404(YoursModel, id=pk)
         favorites = get_object_or_404(
-            Recipe, user=user, recipe=recipe
+            YoursModel, user=user, recipe=recipe
         )
         favorites.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
