@@ -61,12 +61,12 @@ class UserViewSet(
         author = get_object_or_404(User, id=pk)
         subscription = Subscription.objects.filter(
             user=request.user, author=author)
-        if request.method == 'DELETE' and not subscription:
-            return Response(
-                {'errors': 'Вы пытаетесь удалить несуществующую подписку'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         if request.method == 'DELETE':
+            if not subscription:
+                return Response(
+                    {'errors': 'Вы пытаетесь удалить несуществующую подписку'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if subscription:
@@ -122,7 +122,7 @@ class SetPasswordRetypeView(views.APIView):
                 'view': self
             }
         )
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             self.request.user.set_password(serializer.data['new_password'])
             self.request.user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -170,50 +170,72 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeCreateSerializer
         return RecipeReadSerializer
 
-    def create_delete_or_scold(self, model, recipe, request):
-        instance = model.objects.filter(recipe=recipe, user=request.user)
-        name = model.__name__
-        if request.method == 'DELETE' and not instance:
-            return Response(
-                {'errors': f'В Вашем списке не было рецепта: {name}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if request.method == 'DELETE':
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        if instance:
-            return Response(
-                {'errors': f'{name} уже добавлен'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        model.objects.create(user=request.user, recipe=recipe)
-        serializer = RecipeSubscriptionSerializer(
-            recipe,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+    def recipe_post_method(self, request, YoursSerializer, pk):
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=pk)
+
+        data = {
+            'user': user.id,
+            'recipe': recipe.id,
+        }
+        serializer = YoursSerializer(
+            data=data,
+            context={'request': request}
         )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def favorite(self, request, pk):
+    def recipe_delete_method(self, request, pk):
+        user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
-        return self.create_delete_or_scold(Favorite, recipe, request)
+        favorites = get_object_or_404(
+            Recipe, user=user, recipe=recipe
+        )
+        favorites.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        methods=['post', 'delete'],
         detail=True,
+        methods=['post'],
         permission_classes=[permissions.IsAuthenticated]
     )
-    def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return self.create_delete_or_scold(ShoppingCart, recipe, request)
+    def favorite(self, request, pk=None):
+        if request.method == 'POST':
+            return self.recipe_post_method(
+                request, RecipeSubscriptionSerializer, pk
+            )
+
+    @action(
+        detail=True,
+        methods=['delete'],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def delete_favorite(self, request, pk=None):
+        return self.recipe_delete_method(
+            request, Favorite, pk
+        )
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def shopping_cart(self, request, pk=None):
+        if request.method == 'POST':
+            return self.recipe_post_method(
+                request, RecipeSubscriptionSerializer, pk
+            )
+
+    @action(
+        detail=True,
+        methods=['delete'],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def delete_shopping_cart(self, request, pk=None):
+        return self.recipe_delete_method(
+            request, ShoppingCart, pk
+        )
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):

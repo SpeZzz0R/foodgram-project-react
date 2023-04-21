@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
                                 UserCreateSerializer, UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
@@ -60,7 +58,6 @@ class SubscriptionSerializer(CustomUserSerializer):
             'email', 'id', 'username', 'first_name', 'last_name',
             'is_subscribed', 'recipes', 'recipes_count',
         ]
-        # depth = 1
 
     def validate(self, data):
         author = self.instance
@@ -131,13 +128,9 @@ class IngredientsDuringRecipeSerializer(serializers.ModelSerializer):
         fields = ['id', 'amount']
 
     def to_representation(self, instance):
-        old_repr = super().to_representation(instance)
-        new_repr = OrderedDict()
-        new_repr['id'] = old_repr['id']
-        new_repr['name'] = instance.ingredient.name
-        new_repr['measurement_unit'] = instance.ingredient.measurement_unit
-        new_repr['amount'] = old_repr['amount']
-        return new_repr
+        request = self.context.get('request')
+        context = {'request': request}
+        return IngredientsInRecipeSerializer(instance, context=context).data
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -188,7 +181,7 @@ class RecipeCreateSerializer(RecipeReadSerializer):
             'cooking_time'
         ]
 
-    def validate(self, attrs):
+    def validate_tags_and_ingredients(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
             raise serializers.ValidationError(
                 'Нельзя добавить повторяющийся тег несколько раз'
@@ -202,6 +195,19 @@ class RecipeCreateSerializer(RecipeReadSerializer):
             )
 
         return attrs
+
+    def validate_cooking_time(self, cooking_time):
+        if int(cooking_time) < 1:
+            raise serializers.ValidationError(
+                'Время приготовления не можеть занимать '
+                'меньше 1 (одной) минуты!')
+
+        if int(cooking_time) > 1440:
+            raise serializers.ValidationError(
+                'Время приготовления не можеть занимать '
+                'больше 1 (одного) дня!')
+
+        return cooking_time
 
     @transaction.atomic
     def set_recipe_ingredients(self, recipe, ingredients):
@@ -236,14 +242,9 @@ class RecipeCreateSerializer(RecipeReadSerializer):
         return instance
 
     def to_representation(self, instance):
-        repr = super().to_representation(instance)
-        tag_id_list, tag_list = repr['tags'], []
-        for tag_id in tag_id_list:
-            tag = get_object_or_404(Tag, id=tag_id)
-            serialized_tag = OrderedDict(TagSerializer(tag).data)
-            tag_list.append(serialized_tag)
-        repr['tags'] = tag_list
-        return repr
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeReadSerializer(instance, context=context).data
 
 
 class RecipeSubscriptionSerializer(serializers.ModelSerializer):

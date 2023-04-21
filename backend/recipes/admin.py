@@ -3,6 +3,12 @@ from django.contrib import admin
 from .models import (Favorite, Ingredient, Recipe, IngredientsInRecipe,
                      ShoppingCart, Tag)
 
+class RecipeIngredientInline(admin.TabularInline):
+    """Инлайн модель рецепта"""
+
+    model = IngredientsInRecipe
+    min_num = 1
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
@@ -21,6 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ['total_favorites']
     list_filter = ['name', 'author', 'pub_date', 'tags']
     empty_value_display = 'пусто'
+    inlines = (RecipeIngredientInline, )
 
 
     @admin.display(description='Всего в избранном')
