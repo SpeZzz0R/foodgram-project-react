@@ -10,6 +10,10 @@ from users.models import User, Subscription
 from recipes.models import Ingredient, Recipe, IngredientsInRecipe, Tag
 
 
+MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 1440
+
+
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей"""
 
@@ -62,14 +66,23 @@ class SubscriptionSerializer(CustomUserSerializer):
     def validate(self, data):
         author = self.instance
         user = self.context.get('request').user
-        if Subscription.objects.filter(author=author, user=user).exists():
+        subscription = Subscription.objects.filter(author=author,
+                                                   user=user).exists()
+
+        if not subscription:
+            raise ValidationError(
+                detail='Вы пытаетесь удалить несуществующую подписку',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        subscription.delete()
+        if subscription:
             raise ValidationError(
                 detail='Вы уже подписаны на данного пользователя!',
                 code=status.HTTP_400_BAD_REQUEST
             )
         if user == author:
             raise ValidationError(
-                detail='Вы не можете подписаться на самого себя!',
+                detail='Нельзя подписаться на самого себя!',
                 code=status.HTTP_400_BAD_REQUEST
             )
         return data
@@ -181,28 +194,29 @@ class RecipeCreateSerializer(RecipeReadSerializer):
             'cooking_time'
         ]
 
-    def validate_tags_and_ingredients(self, attrs):
+    def validate_tags(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
             raise serializers.ValidationError(
                 'Нельзя добавить повторяющийся тег несколько раз'
             )
+        return attrs
 
+    def validate_ingredients(self, attrs):
         ingredients = [
             item['ingredient'] for item in attrs['ingredientsinrecipe']]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 'Нельзя добавить повторяющийся ингредиент несколько раз'
             )
-
         return attrs
 
     def validate_cooking_time(self, cooking_time):
-        if int(cooking_time) < 1:
+        if int(cooking_time) < MIN_COOKING_TIME:
             raise serializers.ValidationError(
                 'Время приготовления не можеть занимать '
                 'меньше 1 (одной) минуты!')
 
-        if int(cooking_time) > 1440:
+        if int(cooking_time) > MAX_COOKING_TIME:
             raise serializers.ValidationError(
                 'Время приготовления не можеть занимать '
                 'больше 1 (одного) дня!')
