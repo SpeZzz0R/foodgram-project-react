@@ -21,11 +21,10 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
-#      - static_value:/app/result_build/build/static/
     depends_on:
       - backend
 

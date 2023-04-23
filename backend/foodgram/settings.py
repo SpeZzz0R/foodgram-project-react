@@ -16,7 +16,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '[::1]',
     '158.160.20.167',
-    # 'll-praktik.ddns.net'  # ! изменить на мое !
 ]
 
 INSTALLED_APPS = [
