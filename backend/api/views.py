@@ -18,7 +18,7 @@ from .serializers import (CustomSetPasswordRetypeSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSubscriptionSerializer, RecipeReadSerializer,
                           SubscriptionSerializer, TagSerializer)
-from users.models import Subscription, User
+from users.models import User
 from recipes.models import (Favorite, Ingredient, Recipe, IngredientsInRecipe,
                             ShoppingCart, Tag)
 
@@ -131,7 +131,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeCreateSerializer
         return RecipeReadSerializer
 
-    def recipe_post_method(self, request, YoursSerializer, pk):
+    def recipe_post_method(self, request, yoursserializer, pk):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
 
@@ -139,7 +139,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'user': user.id,
             'recipe': recipe.id,
         }
-        serializer = YoursSerializer(
+        serializer = yoursserializer(
             data=data,
             context={'request': request}
         )
@@ -147,11 +147,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def recipe_delete_method(self, request, YoursModel, pk):
+    def recipe_delete_method(self, request, yoursmodel, pk):
         user = request.user
-        recipe = get_object_or_404(YoursModel, id=pk)
+        recipe = get_object_or_404(yoursmodel, id=pk)
         favorites = get_object_or_404(
-            YoursModel, user=user, recipe=recipe
+            yoursmodel, user=user, recipe=recipe
         )
         favorites.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,7 +1,7 @@
 from django.contrib import admin
-
 from .models import (Favorite, Ingredient, Recipe, IngredientsInRecipe,
                      ShoppingCart, Tag)
+
 
 class RecipeIngredientInline(admin.TabularInline):
     """Инлайн модель рецепта"""
@@ -28,7 +28,6 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ['name', 'author', 'pub_date', 'tags']
     empty_value_display = 'пусто'
     inlines = (RecipeIngredientInline, )
-
 
     @admin.display(description='Всего в избранном')
     def total_favorites(self, obj):

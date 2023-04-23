@@ -64,7 +64,7 @@ class Recipe(models.Model):
         Tag,
         verbose_name='Тег',
         related_name='recipes'
-        )
+    )
     author = models.ForeignKey(
         User,
         verbose_name='Автор рецепта',
@@ -95,7 +95,7 @@ class Recipe(models.Model):
                 1440,
                 message='Вы уверены, что приготовление блюда занимает '
                         'более одного дня?!'
-                )
+            )
         ]
     )
     pub_date = models.DateTimeField(
