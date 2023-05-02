@@ -3,8 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (IngredientViewSet, RecipeViewSet, SelfUserView,
                     SetPasswordRetypeView, TagViewSet, UserViewSet,
-                    get_token
-)
+                    get_token)
 
 router = DefaultRouter()
 
