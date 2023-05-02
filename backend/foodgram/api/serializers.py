@@ -3,8 +3,9 @@ from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
                                 UserCreateSerializer, UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import status
-from rest_framework import serializers
+from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.authtoken.models import Token
 
 from users.models import User, Subscription
 from recipes.models import Ingredient, Recipe, IngredientsInRecipe, Tag
@@ -12,6 +13,34 @@ from recipes.models import Ingredient, Recipe, IngredientsInRecipe, Tag
 
 MIN_COOKING_TIME = 1
 MAX_COOKING_TIME = 1440
+
+
+class GetTokenSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254)
+    token = serializers.SerializerMethodField()
+
+    def get_token(self, obj):
+        email = list(obj.items())[0][1]
+        user = User.objects.get(
+            email=email
+        )
+        token, created = Token.objects.get_or_create(user=user)
+        return token.key
+
+    def validate(self, data):
+        email = data['email']
+        password = data['password']
+        try:
+            user = User.objects.get(email=email)
+        except Exception:
+            raise exceptions.AuthenticationFailed('Данные не верные')
+        if not user.check_password(password):
+            raise exceptions.AuthenticationFailed('Данные не верные')
+        return data
+
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'token')
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):

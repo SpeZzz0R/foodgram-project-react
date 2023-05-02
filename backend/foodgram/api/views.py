@@ -8,7 +8,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 
 from .filters import IngredientFilter, RecipeFilter
@@ -17,10 +17,22 @@ from .serializers import (CustomSetPasswordRetypeSerializer,
                           CustomUserCreateSerializer, CustomUserSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSubscriptionSerializer, RecipeReadSerializer,
-                          SubscriptionSerializer, TagSerializer)
+                          SubscriptionSerializer, TagSerializer,
+                          GetTokenSerializer
+                          )
 from users.models import User
 from recipes.models import (Favorite, Ingredient, Recipe, IngredientsInRecipe,
                             ShoppingCart, Tag)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def get_token(request):
+    serializer = GetTokenSerializer(data=request.data)
+    if serializer.is_valid():
+        data = {'auth_token': serializer.data.get('token')}
+        return Response(data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(
