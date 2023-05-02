@@ -41,6 +41,53 @@ docker-compose exec web python manage.py collectstatic --no-input
 ```
 docker-compose exec web python manage.py dumpdata > fixtures.json 
 ```
+## Примеры запросов
+
+#### GET /api/users/ 
+```
+{
+    "count": 3,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "email": "bublik@mail.ru",
+            "id": 2,
+            "username": "Bublik",
+            "first_name": "Вася",
+            "last_name": "Пупкин",
+            "is_subscribed": false
+        },
+        {
+            "email": "vlad.z.spezzz@gmail.com",
+            "id": 3,
+            "username": "Spez",
+            "first_name": "",
+            "last_name": "",
+            "is_subscribed": false
+        },
+        {
+            "email": "vlad.z.lebron@gmail.com",
+            "id": 1,
+            "username": "Vladislav",
+            "first_name": "",
+            "last_name": "",
+            "is_subscribed": false
+        }
+    ]
+}
+```
+
+#### POST /api/users/ 
+```
+{
+    "password": [
+        "Введённый пароль слишком короткий. Он должен содержать как минимум 8 символов.",
+        "Введённый пароль слишком широко распространён.",
+        "Введённый пароль состоит только из цифр."
+    ]
+}
+```
 
 ==============================
 
