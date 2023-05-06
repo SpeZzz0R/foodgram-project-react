@@ -18,6 +18,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/token/login/', get_token),
     path('auth/', include('djoser.urls.authtoken')),
-    # path(r'auth/token/login/', TokenCreateView.as_view(), name='login'),
-    # path(r'auth/token/logout/', TokenDestroyView.as_view(), name='logout'),
 ]

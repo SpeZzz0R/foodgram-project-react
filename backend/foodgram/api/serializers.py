@@ -1,4 +1,3 @@
-from django.db import transaction
 from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
                                 UserCreateSerializer, UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
@@ -8,7 +7,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.models import Token
 
 from users.models import User, Subscription
-from recipes.models import Ingredient, Recipe, IngredientsInRecipe, Tag
+from recipes.models import (Ingredient, Recipe, IngredientsInRecipe, Tag,
+                            Favorite, ShoppingCart)
 
 
 MIN_COOKING_TIME = 1
@@ -16,6 +16,7 @@ MAX_COOKING_TIME = 1440
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для получения токена"""
     email = serializers.EmailField(max_length=254)
     token = serializers.SerializerMethodField()
 
@@ -33,9 +34,9 @@ class GetTokenSerializer(serializers.ModelSerializer):
         try:
             user = User.objects.get(email=email)
         except Exception:
-            raise exceptions.AuthenticationFailed('Данные не верные')
+            raise exceptions.AuthenticationFailed('Введенные данные не верные')
         if not user.check_password(password):
-            raise exceptions.AuthenticationFailed('Данные не верные')
+            raise exceptions.AuthenticationFailed('Введенные данные не верные')
         return data
 
     class Meta:
@@ -54,7 +55,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор для ототбражения информации о пользователях"""
+    """Сериализатор для отображения информации о пользователях"""
 
     is_subscribed = serializers.SerializerMethodField()
 
@@ -74,7 +75,7 @@ class CustomUserSerializer(UserSerializer):
 
 class CustomSetPasswordRetypeSerializer(PasswordSerializer,
                                         CurrentPasswordSerializer):
-    """Сериализатор для изменения пароль пользователя"""
+    """Сериализатор для изменения пароля пользователя"""
 
     pass
 
@@ -194,16 +195,26 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return obj.is_favorited(request.user)
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        existing = Favorite.objects.filter(
+            user=user.id,
+            recipe=obj
+        ).exists()
+        return existing
 
     def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return obj.is_in_shopping_cart(request.user)
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        existing = ShoppingCart.objects.filter(
+            user=user.id,
+            recipe=obj
+        ).exists()
+        return existing
 
 
 class RecipeCreateSerializer(RecipeReadSerializer):
@@ -223,66 +234,44 @@ class RecipeCreateSerializer(RecipeReadSerializer):
             'cooking_time'
         ]
 
-    def validate_tags(self, attrs):
-        if len(attrs['tags']) > len(set(attrs['tags'])):
-            raise serializers.ValidationError(
-                'Нельзя добавить повторяющийся тег несколько раз'
-            )
-        return attrs
-
-    def validate_ingredients(self, attrs):
-        ingredients = [
-            item['ingredient'] for item in attrs['ingredientsinrecipe']]
-        if len(ingredients) > len(set(ingredients)):
-            raise serializers.ValidationError(
-                'Нельзя добавить повторяющийся ингредиент несколько раз'
-            )
-        return attrs
-
     def validate_cooking_time(self, cooking_time):
         if int(cooking_time) < MIN_COOKING_TIME:
             raise serializers.ValidationError(
-                'Время приготовления не можеть занимать '
+                'Время приготовления не может занимать '
                 'меньше 1 (одной) минуты!')
 
         if int(cooking_time) > MAX_COOKING_TIME:
             raise serializers.ValidationError(
-                'Время приготовления не можеть занимать '
+                'Время приготовления не может занимать '
                 'больше 1 (одного) дня!')
 
         return cooking_time
 
-    @transaction.atomic
-    def set_recipe_ingredients(self, recipe, ingredients):
-        recipe_ingredients = [
-            IngredientsInRecipeSerializer(
+    def create_ingredients(self, ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientsInRecipe.objects.create(
                 recipe=recipe,
-                ingredient=current_ingredient['ingredient'],
-                amount=current_ingredient['amount']
+                ingredient=ingredient.get('ingredient'),
+                amount=ingredient.get('amount'),
             )
-            for current_ingredient in ingredients
-        ]
-        IngredientsInRecipeSerializer.objects.bulk_create(recipe_ingredients)
 
-    @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredientsinrecipe')
+        tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        self.set_recipe_ingredients(recipe, ingredients)
+        self.create_ingredients(ingredients, recipe)
         return recipe
 
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredientsinrecipe')
-        instance.ingredients.clear()
-        instance.tags.clear()
-        super().update(instance, validated_data)
-        instance.tags.set(tags)
-        self.set_recipe_ingredients(instance, ingredients)
-        return instance
+    def update(self, recipe, validated_data):
+        if 'ingredientsinrecipe' in validated_data:
+            ingredients = validated_data.pop('ingredientsinrecipe')
+            if 'ingredientsinrecipe':
+                recipe.ingredients.clear()
+            RecipeCreateSerializer.create_ingredients(
+                self, ingredients, recipe
+            )
+        return super().update(recipe, validated_data)
 
     def to_representation(self, instance):
         request = self.context.get('request')
@@ -291,8 +280,25 @@ class RecipeCreateSerializer(RecipeReadSerializer):
 
 
 class RecipeSubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор отображения рецептов на странице подписки"""
+    """Сериализатор подписок"""
+    id = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    cooking_time = serializers.SerializerMethodField()
 
     class Meta:
-        model = Recipe
-        fields = ['id', 'name', 'image', 'cooking_time']
+        model = Favorite
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def get_id(self, obj):
+        return obj.recipe.id
+
+    def get_name(self, obj):
+        return obj.recipe.name
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.recipe.image)
+
+    def get_cooking_time(self, obj):
+        return obj.recipe.cooking_time
