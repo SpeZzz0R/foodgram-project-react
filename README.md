@@ -46,7 +46,7 @@ docker-compose exec web python manage.py dumpdata > fixtures.json
 #### GET /api/users/ 
 ```
 {
-    "count": 3,
+    "count": 6,
     "next": null,
     "previous": null,
     "results": [
@@ -56,6 +56,30 @@ docker-compose exec web python manage.py dumpdata > fixtures.json
             "username": "Bublik",
             "first_name": "Вася",
             "last_name": "Пупкин",
+            "is_subscribed": false
+        },
+        {
+            "email": "dimon@mail.ru",
+            "id": 5,
+            "username": "Dimon",
+            "first_name": "Dimon",
+            "last_name": "Dmitriev",
+            "is_subscribed": false
+        },
+        {
+            "email": "maria@mail.ru",
+            "id": 4,
+            "username": "Maria",
+            "first_name": "Maria",
+            "last_name": "Ivanova",
+            "is_subscribed": false
+        },
+        {
+            "email": "j23.2020@yandex.ru",
+            "id": 6,
+            "username": "NJackson",
+            "first_name": "Jack",
+            "last_name": "Black",
             "is_subscribed": false
         },
         {
