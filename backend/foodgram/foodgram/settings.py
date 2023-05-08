@@ -29,11 +29,13 @@ INSTALLED_APPS = [
     'users',
     'recipes',
     'api',
+    'djoser',
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',
     'django_filters',
 ]
+
+# AUTH_TOKEN_MODEL = 'rest_framework.authtoken.Token'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -79,6 +81,7 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
         'HOST': os.getenv('DB_HOST', default='db'),
+        # 'HOST': os.getenv('DB_HOST', default='localhost'),
         'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
