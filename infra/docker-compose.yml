@@ -10,7 +10,7 @@ services:
       - ./.env
 
   backend:
-    image: spezzz/foodgram:latest
+    image: spezzz/backend:latest
 #    build:
 #      context: ../backend/foodgram
 #      dockerfile: Dockerfile
@@ -22,7 +22,7 @@ services:
       - db
 
   frontend:
-    image: spezzz/foodgram_frontend:latest
+    image: spezzz/frontend:latest
 #    build:
 #      context: ../frontend
 #      dockerfile: Dockerfile
