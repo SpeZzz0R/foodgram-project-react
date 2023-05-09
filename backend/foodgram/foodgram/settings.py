@@ -35,8 +35,6 @@ INSTALLED_APPS = [
     'django_filters',
 ]
 
-# AUTH_TOKEN_MODEL = 'rest_framework.authtoken.Token'
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -111,9 +109,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# STATIC_URL = '/static/'
 STATIC_URL = '/static_backend/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_backend')
 
 MEDIA_URL = '/media/'

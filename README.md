@@ -39,21 +39,12 @@ python -m pip install --upgrade pip
 cd ..
 cd infra_server
 ```
-* Переименуйте файд .to-env в env
-* Создайте контейнер.
+* Переименуйте файд .to-env в .env
+* Создайте контейнеры.
 ```
 docker-compose up
 ```
-* Проведите миграции, создайте суперпользователя, соберите статику.
-```
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py createsuperuser
-docker-compose exec web python manage.py collectstatic --no-input 
-```
-* Создайте резервную копию базы.
-```
-docker-compose exec web python manage.py dumpdata > fixtures.json 
-```
+
 ## Примеры запросов
 
 #### GET /api/users/ 
@@ -64,51 +55,51 @@ docker-compose exec web python manage.py dumpdata > fixtures.json
     "previous": null,
     "results": [
         {
-            "email": "bublik@mail.ru",
+            "email": "dima@mail.ru",
             "id": 2,
-            "username": "Bublik",
-            "first_name": "Вася",
-            "last_name": "Пупкин",
+            "username": "Dima",
+            "first_name": "Dima",
+            "last_name": "Dimov",
             "is_subscribed": false
         },
         {
-            "email": "dimon@mail.ru",
-            "id": 5,
-            "username": "Dimon",
-            "first_name": "Dimon",
-            "last_name": "Dmitriev",
+            "email": "james@mail.ru",
+            "id": 1,
+            "username": "James",
+            "first_name": "James",
+            "last_name": "Jamison",
             "is_subscribed": false
         },
         {
             "email": "maria@mail.ru",
-            "id": 4,
-            "username": "Maria",
-            "first_name": "Maria",
-            "last_name": "Ivanova",
-            "is_subscribed": false
-        },
-        {
-            "email": "j23.2020@yandex.ru",
-            "id": 6,
-            "username": "NJackson",
-            "first_name": "Jack",
-            "last_name": "Black",
-            "is_subscribed": false
-        },
-        {
-            "email": "vlad.z.spezzz@gmail.com",
             "id": 3,
-            "username": "Spez",
+            "username": "Maria",
+            "first_name": "Мария",
+            "last_name": "Петрова",
+            "is_subscribed": false
+        },
+        {
+            "email": "nika@mail.ru",
+            "id": 4,
+            "username": "Nika",
+            "first_name": "Ника",
+            "last_name": "Никова",
+            "is_subscribed": false
+        },
+        {
+            "email": "puma@mail.ru",
+            "id": 5,
+            "username": "Puma",
             "first_name": "",
             "last_name": "",
             "is_subscribed": false
         },
         {
-            "email": "vlad.z.lebron@gmail.com",
-            "id": 1,
-            "username": "Vladislav",
-            "first_name": "",
-            "last_name": "",
+            "email": "sergei@mail.ru",
+            "id": 6,
+            "username": "Sergei",
+            "first_name": "Сергей",
+            "last_name": "Сергеев",
             "is_subscribed": false
         }
     ]
@@ -126,9 +117,27 @@ docker-compose exec web python manage.py dumpdata > fixtures.json
 }
 ```
 
+#### GET /api/tags/
+```
+[
+    {
+        "id": 2,
+        "name": "Борщ",
+        "color": "#734a12",
+        "slug": "borsch"
+    },
+    {
+        "id": 1,
+        "name": "Жар. картошка",
+        "color": "#ffd700",
+        "slug": "fried_fri"
+    }
+]
+```
+
 ==============================
 
-> Над проектом работал:  
->
-> Владислав Запесочный https://github.com/SpeZzz0R  
+> Автором проекта является начинающий backend-разработчик
+> Запесочный Владислав. 
+> Страница на github: https://github.com/SpeZzz0R  
 > 
