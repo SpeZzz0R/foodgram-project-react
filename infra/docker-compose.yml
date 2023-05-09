@@ -10,10 +10,9 @@ services:
       - ./.env
 
   backend:
-    image: spezzz/backend:latest
-#    build:
-#      context: ../backend/foodgram
-#      dockerfile: Dockerfile
+    build:
+      context: ../backend/foodgram
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - static_value:/app/static_backend/
@@ -22,10 +21,9 @@ services:
       - db
 
   frontend:
-    image: spezzz/frontend:latest
-#    build:
-#      context: ../frontend
-#      dockerfile: Dockerfile
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
       - static_value:/app/result_build/build/static/
