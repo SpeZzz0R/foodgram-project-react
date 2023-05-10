@@ -10,7 +10,7 @@ services:
       - ./.env
 
   backend:
-    image: spezzz/foodgram-backend:latest
+    image: spezzz/foodgram:latest
 #    build:
 #      context: ../backend/foodgram
 #      dockerfile: Dockerfile
