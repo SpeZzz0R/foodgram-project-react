@@ -6,8 +6,6 @@ COPY . .
 CMD ["gunicorn", "foodgram.wsgi:application", "--bind", "0:8000"]
 
 
-
-
 #FROM python:3.7-slim
 #WORKDIR /app
 #COPY requirements.txt .
