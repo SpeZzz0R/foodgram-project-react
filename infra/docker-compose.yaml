@@ -22,10 +22,10 @@ services:
       - db
 
   frontend:
-    image: spezzz/foodgram-frontend:v.01
-#    build:
-#      context: ../frontend
-#      dockerfile: Dockerfile
+#    image: spezzz/foodgram-frontend:v.01
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
       - static_value:/app/result_build/build/static/
