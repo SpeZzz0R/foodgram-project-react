@@ -50,7 +50,7 @@ services:
       - static_value:/var/html/static_backend/
       - media_value:/var/html/media/
     depends_on:
-      - backend
+      - frontend
 
 volumes:
   postgres_data:
