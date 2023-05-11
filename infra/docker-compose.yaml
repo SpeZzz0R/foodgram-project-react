@@ -22,8 +22,8 @@ services:
 #      - scripts:/app/scripts/
     depends_on:
       - db
-    env_file:
-      - ./.env
+#    env_file:
+#      - ./.env
 
   frontend:
     image: spezzz/foodgram-frontend:v.01
