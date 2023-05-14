@@ -8,16 +8,11 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='key')
-# SECRET_KEY = 'django-insecure-$sflnat+5ng6#vg@5zc+fll)btbm-di*-=tj!egl)zgjx@dk#q'
 
 DEBUG = True
-# DEBUG = False
 
 ALLOWED_HOSTS = [
     '*',
-    # 'localhost',
-    # '127.0.0.1',
-    # '158.160.20.167',
 ]
 
 INSTALLED_APPS = [
@@ -80,7 +75,6 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
         'HOST': os.getenv('DB_HOST', default='db'),
-        # 'HOST': 'localhost',
         'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
@@ -110,8 +104,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-# STATIC_URL = '/static_backend/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static_backend')
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
