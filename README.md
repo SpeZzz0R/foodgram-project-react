@@ -2,6 +2,7 @@
 
 
 # Сайт Foodgram "Продуктовый помощник"
+> 158.160.20.167
 
 ## О проекте
 На этом сервисе пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
@@ -12,7 +13,7 @@
 - Django REST Framework 3.13.1
 - Djoser 2.1.0
 - gunicorn 20.0.4
-- nginx 1.21.1
+- nginx 1.21.3
 - PostgreSQL 15.0
 
 ## Запуск проекта
@@ -50,58 +51,34 @@ docker-compose up
 #### GET /api/users/ 
 ```
 {
-    "count": 6,
+    "count": 4,
     "next": null,
     "previous": null,
     "results": [
         {
-            "email": "dima@mail.ru",
-            "id": 2,
-            "username": "Dima",
-            "first_name": "Dima",
-            "last_name": "Dimov",
-            "is_subscribed": false
-        },
-        {
-            "email": "james@mail.ru",
+            "email": "ivan@mail.ru",
             "id": 1,
-            "username": "James",
-            "first_name": "James",
-            "last_name": "Jamison",
-            "is_subscribed": false
-        },
-        {
-            "email": "maria@mail.ru",
-            "id": 3,
-            "username": "Maria",
-            "first_name": "Мария",
-            "last_name": "Петрова",
+            "username": "Ivan",
+            "first_name": "Иван",
+            "last_name": "Иванов",
             "is_subscribed": false
         },
         {
             "email": "nika@mail.ru",
-            "id": 4,
+            "id": 3,
             "username": "Nika",
-            "first_name": "Ника",
-            "last_name": "Никова",
+            "first_name": "Nika",
+            "last_name": "Nikova",
             "is_subscribed": false
         },
         {
             "email": "puma@mail.ru",
-            "id": 5,
+            "id": 2,
             "username": "Puma",
             "first_name": "",
             "last_name": "",
             "is_subscribed": false
         },
-        {
-            "email": "sergei@mail.ru",
-            "id": 6,
-            "username": "Sergei",
-            "first_name": "Сергей",
-            "last_name": "Сергеев",
-            "is_subscribed": false
-        }
     ]
 }
 ```
@@ -121,16 +98,34 @@ docker-compose up
 ```
 [
     {
-        "id": 2,
-        "name": "Борщ",
-        "color": "#734a12",
-        "slug": "borsch"
+        "id": 3,
+        "name": "Завтрак",
+        "color": "#7ab3d0",
+        "slug": "breakfast"
     },
     {
         "id": 1,
-        "name": "Жар. картошка",
-        "color": "#ffd700",
-        "slug": "fried_fri"
+        "name": "Десерт",
+        "color": "#ffc0cb",
+        "slug": "dessert"
+    },
+    {
+        "id": 2,
+        "name": "Ужин",
+        "color": "#b01030",
+        "slug": "dinner"
+    },
+    {
+        "id": 5,
+        "name": "Напиток",
+        "color": "#1919e6",
+        "slug": "drink"
+    },
+    {
+        "id": 4,
+        "name": "Суп",
+        "color": "#d2691e",
+        "slug": "soup"
     }
 ]
 ```
